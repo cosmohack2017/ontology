@@ -1,9 +1,11 @@
 'use strict';
 
-const fs = require('fs');
 const Database = require('./database');
+const fs = require('fs');
 
 const database = new Database();
+
+const db = 'testdb';
 
 database.connect({
     endpoint: 'http://localhost:5820',
@@ -22,7 +24,7 @@ database.connect({
         }
 
         database.addRdfData({
-            database: 'testdb',
+            database: db,
             graph: 'urn:graph1',
             data: data
         }, (err) => {
@@ -36,7 +38,7 @@ database.connect({
                 }
 
                 database.addRdfData({
-                    database: 'testdb',
+                    database: db,
                     graph: 'urn:graph2',
                     data: data
                 }, (err) => {
