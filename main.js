@@ -18,7 +18,7 @@ database.connect({
         throw err;
     }
 
-    fs.readFile('./ontologies/wine.rdf', (err, data) => {
+    fs.readFile('./wine.rdf', (err, data) => {
         if (err) {
             throw err;
         }
@@ -32,7 +32,7 @@ database.connect({
                 throw err;
             }
 
-            fs.readFile('./ontologies/foaf.rdf', (err, data) => {
+            fs.readFile('./foaf.rdf', (err, data) => {
                 if (err) {
                     throw err;
                 }
