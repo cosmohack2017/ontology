@@ -107,4 +107,54 @@ module.exports = class Database {
             callback(null, json);
         }
     }
+
+    _post(url, options, callback) {
+        this._request(url, Object.assign({}, options, {
+            method: 'POST',
+            [options.type]: options.data
+        }), callback);
+    }
+
+    _trAddFileData(options, callback) {
+        options.contentType = options.contentType || 'application/rdf+xml';
+
+        this._post(`/${options.database}/${options.tid}/add?graph-uri=${options.graph}`, Object.assign({}, options, {
+            type: 'body'
+        }), callback);
+    }
+
+    _trDeleteFileData(options, callback) {
+        options.contentType = options.contentType || 'application/rdf+xml';
+
+        this._post(`/${options.database}/${options.tid}/remove?graph-uri=${options.graph}`, Object.assign({}, options, {
+            type: 'body'
+        }), callback);
+    }
+
+    _addOrDeleteFileData(options, callback) {
+        this.trBegin(options, (err, tid) => {
+            if (err) {
+                return callback(err);
+            }
+
+            const addOrDeleteFileData = options.delete ?
+                this._trDeleteFileData : this._trAddFileData;
+
+            addOrDeleteFileData.call(this, Object.assign({}, options, {
+                tid: tid
+            }), (err) => {
+                if (err) {
+                    return this.trRollback(Object.assign({}, options, {
+                        tid: tid
+                    }), (err2) => {
+                        callback(err2 || err);
+                    });
+                }
+
+                this.trCommit(Object.assign({}, options, {
+                    tid: tid
+                }), callback);
+            });
+        });
+    }
 };
