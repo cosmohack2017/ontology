@@ -48,4 +48,63 @@ module.exports = class Database {
             auth: options.auth
         }, callback);
     }
+
+    addRdfData(options, callback) {
+        this._addOrDeleteFileData(options, callback);
+    }
+
+    _request(url, options, callback) {
+        _.defaultsDeep(options, this._options);
+        options.url = this._endpoint + url;
+
+        if (options.contentType) {
+            options.headers['content-type'] = options.contentType;
+        }
+
+        options.accept = options.accept || '*/*';
+
+        _.defaults(options.headers, {
+            accept: options.accept
+        });
+
+        request(options, (err, resp, data) => {
+            if (err) {
+                return callback(err);
+            }
+
+            if (!/^2\d\d$/.test(resp.statusCode)) {
+                if (data.length) {
+                    return callback(new Error(data));
+                }
+                return callback(new Error(resp.statusCode + ' ' + resp.statusMessage));
+            }
+
+            if (!data || !data.length) {
+                return callback();
+            }
+
+            const contentType = resp.headers['content-type'];
+
+            if (contentType) {
+                if ((contentType.includes('application/sparql-results+json')) ||
+                    (contentType.includes('application/json'))) {
+
+                    return jsonParse(data, callback);
+                }
+                else if (contentType === 'text/boolean') {
+                    return callback(null, (data === 'true'));
+                }
+            }
+            callback(null, data);
+        });
+
+        function jsonParse(json, callback) {
+            try {
+                json = JSON.parse(json);
+            } catch (err) {
+                return callback(err);
+            }
+            callback(null, json);
+        }
+    }
 };
