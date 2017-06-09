@@ -9,26 +9,42 @@ database.connect({
     endpoint: 'http://localhost:5820',
     auth: {
         user: 'admin',
-        pass: '9324w1d53'
+        pass: 'admin'
     }
 }, (err) => {
     if (err) {
         throw err;
     }
 
-    fs.readFile('./ontologies/foaf.rdf', (err, data) => {
+    fs.readFile('./ontologies/wine.rdf', (err, data) => {
         if (err) {
             throw err;
         }
 
         database.addRdfData({
             database: 'testdb',
-            graph: 'urn:graph',
+            graph: 'urn:graph1',
             data: data
         }, (err) => {
             if (err) {
                 throw err;
             }
+
+            fs.readFile('./ontologies/foaf.rdf', (err, data) => {
+                if (err) {
+                    throw err;
+                }
+
+                database.addRdfData({
+                    database: 'testdb',
+                    graph: 'urn:graph2',
+                    data: data
+                }, (err) => {
+                    if (err) {
+                        throw err;
+                    }
+                });
+            });
         });
     });
 });
